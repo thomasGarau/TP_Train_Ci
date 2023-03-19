@@ -1,0 +1,342 @@
+public static class Main{
+    public static void main(string[] args) throws{
+        ListGare# listGare = new ListGare();
+        Gare# g1 = new Gare();
+        g1.init("Lille");
+        listGare.AddToList(g1);
+        Gare# g2 = new Gare();
+        g2.init("Paris");
+        listGare.AddToList(g2);
+        Gare# g3 = new Gare();
+        g3.init("Lyon");
+        listGare.AddToList(g3);
+        Gare# g4 = new Gare();
+        g4.init("Calais");
+        listGare.AddToList(g4);
+        Gare# g5 = new Gare();
+        g5.init("Marseille");
+        listGare.AddToList(g5);
+        Train# t1 = new Train();
+        t1.init(237, g1, g2, "08:00", "08:59");
+        Train# t2 = new Train();
+        t2.init(709,g1, g3, "07:00", "10:00");
+        Train# t3 = new Train();
+        t3.init(900, g2, g5, "12:00", "18:00");
+        listGare.TrajetMoinsLong("Lille", "Marseille");
+    }
+}
+
+public class Train{
+
+    Horaire temps;
+    int distance;
+    Gare gareDepart;
+    Gare gareArrive;
+
+    public Train(){
+
+    }
+
+    public void init(int nDistance, Gare nDepartGare, Gare nArriveGare, string nDepart, string nArrive){
+        this.distance = nDistance;
+        Horaire# horaire = new Horaire();
+        horaire.init(nDepart, nArrive, nDepartGare);
+        this.temps = horaire;
+        this.gareDepart = nDepartGare;
+        this.gareArrive = nArriveGare;
+        nDepartGare.setListTrainDepart(this);
+        nArriveGare.setListTrainArrive(this);
+    }
+
+    public Gare GetGareArrive(){
+        return this.gareArrive;
+    }
+
+    public Gare GetGareDepart(){
+        return this.gareDepart;
+    }
+
+    public int GetDistance(){
+        return this.distance;
+    }
+
+    public Horaire GetHoraire(){
+        return this.temps;
+    }
+
+    public string toString(){
+        return $"Train de la gare de {this.gareDepart.getVille()} pour {this.gareArrive.getVille()}, {this.temps.toString()}, {this.distance} Km \n";
+    }
+
+    public int CalculVitesse() throws{
+        string heureDepart = this.temps.getDepart().Substring(0, 2);
+        int secDepart = String2Int.ParseUnsignedInt(heureDepart) * 3600;
+        string minuteDepart = this.temps.getDepart().Substring(3, 2);
+        secDepart += String2Int.ParseUnsignedInt(minuteDepart) * 60;
+        string heureArrive = this.temps.getArrive().Substring(0, 2);
+        int secArrive = String2Int.ParseUnsignedInt(heureArrive) * 3600;
+        string minuteArrive = this.temps.getArrive().Substring(3, 2);
+        secArrive += String2Int.ParseUnsignedInt(minuteArrive) * 60;
+        int secDiff = secArrive - secDepart;
+        int vitesse = (distance * 1000 / secDiff);
+        Console.Write($"La vitesse moyenne prévu du train est {vitesse} m/s \n");
+        return vitesse;
+    }
+
+
+}
+
+public class Horaire{
+
+    string depart;
+    string arrive;
+    Gare gare;
+    
+
+    public Horaire(){}
+
+    public void init(string nDepart, string nArrive, Gare nGare){
+        this.depart = nDepart;
+        this.arrive = nArrive;
+        this.gare = nGare;
+        gare.setListHoraire(this);
+    }
+    
+    public string getDepart(){
+        return this.depart;
+    }
+
+    public string getArrive(){
+        return this.arrive;
+    }
+
+    public string toString(){
+        return $"Depart à {this.depart} arrivée à {this.arrive}";
+    }
+
+}
+
+public class Gare{
+
+    List<Train>() listTrainDepart;
+    List<Train>() listTrainArrive;
+    List<Horaire>() listHoraire;
+    string ville;
+
+    public Gare(){}
+
+    public void init(string nVille){
+        this.ville  = nVille;
+    }
+
+    public List<Train> getListTrain(){
+        return this.listTrainDepart;
+    }
+
+    public string getVille(){
+        return this.ville;
+    }
+
+    public void setListHoraire(Horaire h){
+        listHoraire.Add(h);
+    }
+
+    public void setListTrainDepart(Train t){
+        listTrainDepart.Add(t);
+    }
+
+    public void setListTrainArrive(Train t){
+        listTrainArrive.Add(t);
+    }
+
+    public void villeDepart(){
+        foreach(Train train in this.listTrainDepart){
+            Console.Write(train.toString());
+        }
+    }
+    
+}
+ public class ListGare{
+
+    List<Gare>() listGare;
+    List<Train>() listTrain;
+
+    public ListGare(){ }
+
+    public List<Gare> GetListGare(){
+        return this.listGare;
+    }
+
+    public List<Train> GetListTrain(){
+        return this.listTrain;
+    }
+
+    public void AddToList(Gare g){
+        this.listGare.Add(g);
+    }
+
+    public Train vitessePlusEleve() throws{
+
+        Train tempTrain;
+        int vitesseMax = 0;
+        foreach(Gare gare in this.listGare){
+            foreach(Train train in gare.getListTrain()){
+                int vitesse = train.CalculVitesse();
+                if( vitesse > vitesseMax){
+                    vitesseMax = vitesse;
+                    tempTrain = train;
+                }
+            }
+        }
+        Console.Write($"Le train le plus rapide est {tempTrain.toString()}\n");
+        return tempTrain;
+    }
+    
+    public void parcourirTrain(){
+        foreach(Train train in this.listTrain){
+            Console.Write(train.toString());
+        }
+    }
+
+    public List<Train> triHoraire() throws{
+        this.listTrain.Clear;
+        foreach(Gare gare in this.listGare){
+            foreach(Train train in gare.getListTrain()){
+                this.listTrain.Add(train);
+            }
+        }
+        for(int i = this.listTrain.Count - 1; i >= 0; i--){
+            int compHoraire = String2Int.toSecond(this.listTrain[i].GetHoraire().getDepart());
+            for(int j = i - 1; j >= 0; j--){
+                int compHoraire1 = String2Int.toSecond(this.listTrain[j].GetHoraire().getDepart());
+                if(compHoraire < compHoraire1){
+                    Train temp = this.listTrain[i];
+                    this.listTrain.RemoveAt(i);
+                    this.listTrain.Insert(j, temp);
+                    
+                }
+            }
+        }
+        this.parcourirTrain();
+        return this.listTrain;
+    }
+
+    public int CalculDuree(string depart, string arrive) throws{
+        string heureDepart = depart.Substring(0, 2);
+        int secDepart = String2Int.ParseUnsignedInt(heureDepart) * 3600;
+        string minuteDepart = depart.Substring(3, 2);
+        secDepart += String2Int.ParseUnsignedInt(minuteDepart) * 60;
+        string heureArrive = arrive.Substring(0, 2);
+        int secArrive = String2Int.ParseUnsignedInt(heureArrive) * 3600;
+        string minuteArrive = arrive.Substring(3, 2);
+        secArrive += String2Int.ParseUnsignedInt(minuteArrive) * 60;
+        int secDiff = secArrive - secDepart;
+        int hours = secDiff / 3600;
+        int minutes = (secDiff % 3600) / 60;
+        int seconds = (secDiff % 60);
+        Console.Write($"Le trajet durera {hours} heures et {minutes} minutes \n");
+        return secDiff;
+    }
+
+    public List<Train>() TrainApres(List<Train>() res) throws{
+        
+        foreach(Train train in res){
+            foreach(Train train2 in this.listTrain){
+                if(train.GetGareArrive().getVille() == train2.GetGareDepart().getVille()
+                    && String2Int.toSecond(train.GetHoraire().getArrive()) < String2Int.toSecond(train2.GetHoraire().getDepart())){ 
+                    res.Add(train2);
+                }
+            }
+        }
+        return res;
+    }
+
+    public List<Train>() TrajetMoinsLong(string depart, string arrive) throws{
+        bool existeD = false;
+        bool existeA = false;
+        List<Train>() result;
+        foreach(Gare gare in this.listGare){
+            if(gare.getVille() == depart){
+                existeD = true;
+            }
+            if(gare.getVille() == arrive){
+                existeA = true;
+            }
+        }
+        if(!existeA && !existeD){
+            Console.Write("la ligne n'existe pas 1");
+            result.Clear;
+            return result;
+        }
+        this.triHoraire(); 
+        Train tempTrain = vitessePlusEleve();
+        if(tempTrain.GetGareDepart().getVille() == depart && tempTrain.GetGareArrive().getVille() == arrive){
+            Console.Write($"Le trajet le moins ce fait par le train de {tempTrain.toString()}");
+            result.Add(tempTrain);
+            return result;
+        }
+        else {
+            Dictionary<int,List<Train>()>() cheminPossible;
+            for(int i = 0; i < this.listTrain.Count; i++){
+                List<Train>() res;
+                res.Add(this.listTrain[i]);
+                cheminPossible[i] = res;
+            }
+            int index;
+            int dureeMin = 1000000;
+            List<Train>() meilleurChemin;
+            foreach((int j, List<Train>() tes) in cheminPossible){
+                meilleurChemin = TrainApres(tes);
+                string departT = meilleurChemin[0].GetHoraire().getDepart();
+                string arriveT = meilleurChemin[-1].GetHoraire().getArrive();
+                int duree = CalculDuree(departT, arriveT);
+                if (dureeMin > duree && meilleurChemin[0].GetGareDepart().getVille() == depart && meilleurChemin[-1].GetGareArrive().getVille() == arrive){
+                    dureeMin = duree;
+                    index = j;
+                }
+            }
+            result = cheminPossible[index];
+            Console.Write($"Le trajet le plus rapide est le {index} pour {depart} -> {arrive}");
+            return result;      
+        }
+    }
+}
+
+public static class String2Int
+{
+	public static int ParseUnsignedInt(string s) throws
+	{
+		if (s.Length == 0)
+			throw "Empty string";
+		int r = 0;
+		foreach (int c in s) {
+			if (c < '0' || c > '9')
+				throw "Not a digit";
+			if (r > 214748364 || (r == 214748364 && c >= '8'))
+				throw "Number too big";
+			r = r * 10 + c - '0';
+		}
+		return r;
+	}
+
+    public static int toSecond(string s) throws{
+        int toSec = ParseUnsignedInt(s.Substring(0,2)) * 3600;
+        toSec += ParseUnsignedInt(s.Substring(3,2)) * 60;
+        return toSec;
+    }
+
+#if DOUBLE_TRYPARSE
+	public static int ParseInt(string s) throws
+	{
+		double d;
+		if (!d.TryParse(s))
+			throw "Invalid number";
+		int r = Math.Truncate(d);
+		if (r != d)
+			throw "Not an integer";
+		return r;
+	}
+#endif
+
+}
+
